@@ -2,6 +2,8 @@ var IMG_SRC  = 'media/rosebowl.jpg';
 var OVERLAY  = 255;   // 0 = foreground, 255 = background
 var NUM_FISHES = 10;
 
+// array of fish images. default fish face right 0 degrees.
+var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
 var fishes = [];
 var stanfordImage;
 var imageReady = false;
@@ -13,7 +15,9 @@ $(document).ready(function() {
     }
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
-      fishes[ii] = {x: ii*10, y: ii*50, width: 10, height: 10, speed: 10*Math.random()};
+	   var fishImage = new Image();
+	   fishImage.src = fishGallery[ii%2];
+       fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, speed: 10*Math.random(), image: fishImage};
     }
 });
 
@@ -71,10 +75,12 @@ function renderShadow() {
 
         for (var ii = 0; ii < NUM_FISHES; ii++) {
           fishInfo = fishes[ii];
-          shadowContext.beginPath();
-          shadowContext.arc(fishInfo.x,fishInfo.y,fishInfo.width,0,360,true);
-          shadowContext.fill();
-          shadowContext.closePath();
+          //shadowContext.beginPath();
+          //shadowContext.arc(fishInfo.x,fishInfo.y,fishInfo.width,0,360,true);
+          //shadowContext.fill();
+          //shadowContext.closePath();
+		  
+		   shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
           fishInfo.x += fishInfo.speed;
           if (changeDirection(fishInfo)) {
             fishInfo.speed *= -1;
