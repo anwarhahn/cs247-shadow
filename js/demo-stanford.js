@@ -1,4 +1,4 @@
-var IMG_SRC  = 'media/rosebowl.jpg';
+var IMG_SRC  = 'media/underwater.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
