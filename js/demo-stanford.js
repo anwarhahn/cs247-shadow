@@ -13,9 +13,19 @@ $(document).ready(function() {
     }
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
-      fishes[ii] = {x: ii*10, y: ii*50, speed: 4*Math.random(), right: true};
+      fishes[ii] = {x: ii*10, y: ii*50, width: 10, height: 10, speed: 10*Math.random()};
     }
 });
+
+function changeDirection(fishInfo) {
+  if (fishInfo.x <= 0 ||
+      fishInfo.x + fishInfo.width >= shadowCanvas.width ||
+      fishInfo.y <= 0 ||
+      fishInfo.y + fishInfo.height >= shadowCanvas.height) {
+    return true;
+  }
+  return false;
+}
 
 /*
  * In this example, we show you how to overlay the shadow information over
@@ -62,10 +72,13 @@ function renderShadow() {
         for (var ii = 0; ii < NUM_FISHES; ii++) {
           fishInfo = fishes[ii];
           shadowContext.beginPath();
-          shadowContext.arc(fishInfo.x,fishInfo.y,10,0,360,true);
+          shadowContext.arc(fishInfo.x,fishInfo.y,fishInfo.width,0,360,true);
           shadowContext.fill();
           shadowContext.closePath();
           fishInfo.x += fishInfo.speed;
+          if (changeDirection(fishInfo)) {
+            fishInfo.speed *= -1;
+          }
         }
     }
 
