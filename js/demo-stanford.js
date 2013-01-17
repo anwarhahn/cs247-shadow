@@ -21,7 +21,9 @@ $(document).ready(function() {
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
    fishImage.src = fishGallery[ii%2];
-     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, lastTime: 0, image: fishImage};
+     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
+	               xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
+				   lastTime: 0, image: fishImage, outOfBounds: false};
   }
 });
 
@@ -30,8 +32,10 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
       fishInfo.x + fishInfo.width > shadowCanvas.width ||
       fishInfo.y < 0 ||
       fishInfo.y + fishInfo.height > shadowCanvas.height) {
+	  fishInfo.outOfBounds = true;
     return true;
   }
+  fishInfo.outOfBounds = false;
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
     for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
       var x = fishInfo.x + dx;
@@ -104,18 +108,27 @@ function renderShadow() {
     shadowContext.putImageData(pixels, 0, 0);
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
+		var time = (new Date()).getTime();
+		if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
+			fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
+			fishes[ii].image.src = "../images/fish_yellow.png";
+		}	
       fishInfo = fishes[ii];
       //shadowContext.beginPath();
       //shadowContext.arc(fishInfo.x,fishInfo.y,fishInfo.width,0,360,true);
       //shadowContext.fill();
       //shadowContext.closePath();
-  
+    
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
       fishInfo.x += fishInfo.xSpeed;
       fishInfo.y += fishInfo.ySpeed;
+	  
       if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
-        var time = (new Date()).getTime();
+        //var time = (new Date()).getTime();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
+		  if(!fishInfo.outOfBounds){
+			fishes[ii].image.src = "../images/fish_yellow_r.png";
+		   }
           fishInfo.xSpeed *= -1;
           fishInfo.ySpeed *= -1;
           fishInfo.lastTime = time;
