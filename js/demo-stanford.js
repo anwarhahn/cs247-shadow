@@ -1,6 +1,7 @@
 var IMG_SRC  = 'media/rosebowl.jpg';
-var OVERLAY  = 255;   // 0 = foreground, 255 = background
+var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var NUM_FISHES = 10;
+var SHOW_DEBUG_SHADOW = true;
 
 // array of fish images. default fish face right 0 degrees.
 var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
@@ -31,6 +32,11 @@ function changeDirection(fishInfo) {
   return false;
 }
 
+function toggleDebugShadow() {
+    SHOW_DEBUG_SHADOW = !SHOW_DEBUG_SHADOW;
+}
+
+
 /*
  * In this example, we show you how to overlay the shadow information over
  * an image painted into the canvas. This function is called in a loop
@@ -54,19 +60,21 @@ function renderShadow() {
         shadowContext.drawImage(stanfordImage, 0, 0, shadowCanvas.width, shadowCanvas.height);    
         var pixels = shadowContext.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height);
 
-        // Now that the shadowContext has our jpeg painted, we can
-        // loop pixel by pixel and only show the parts where the shadow lies.
-        // 
-        // IMPORTANT: make sure that the width and height of your two
-        // canvases match. Otherwise, here be dragons!
-        for(var i = 0; i < shadow.data.length; i=i+4) {
-            // i = red; i+1 = green; i+2 = blue; i+3 = alpha
-            if(shadow.data[i] == OVERLAY && shadow.data[i+1] == OVERLAY && shadow.data[i+2] == OVERLAY) {
-                // If the current shadow pixel is to be overlayed, copy it over to
-                // our canvas' pixel data
-                pixels.data[i]   = shadow.data[i];
-                pixels.data[i+1] = shadow.data[i+1];
-                pixels.data[i+2] = shadow.data[i+2];
+        if (SHOW_DEBUG_SHADOW) {
+            // Now that the shadowContext has our jpeg painted, we can
+            // loop pixel by pixel and only show the parts where the shadow lies.
+            // 
+            // IMPORTANT: make sure that the width and height of your two
+            // canvases match. Otherwise, here be dragons!
+            for(var i = 0; i < shadow.data.length; i=i+4) {
+                // i = red; i+1 = green; i+2 = blue; i+3 = alpha
+                if(shadow.data[i] == OVERLAY && shadow.data[i+1] == OVERLAY && shadow.data[i+2] == OVERLAY) {
+                    // If the current shadow pixel is to be overlayed, copy it over to
+                    // our canvas' pixel data
+                    pixels.data[i]   = shadow.data[i];
+                    pixels.data[i+1] = shadow.data[i+1];
+                    pixels.data[i+2] = shadow.data[i+2];
+                }
             }
         }
 
