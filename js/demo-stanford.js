@@ -1,10 +1,10 @@
-var IMG_SRC  = 'media/rosebowl.jpg';
+var IMG_SRC  = 'media/underwater.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
 
 // array of fish images. default fish face right 0 degrees.
-var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
+var fishGallery = ["images/fish_yellow.png", "images/fish_green.png"];
 var fishes = [];
 var stanfordImage;
 var imageReady = false;
