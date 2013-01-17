@@ -3,7 +3,8 @@ var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
-var CHANGE_DIR_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
+var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
+var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
 
 // array of fish images. default fish face right 0 degrees.
 var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
@@ -20,7 +21,7 @@ $(document).ready(function() {
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
    fishImage.src = fishGallery[ii%2];
-     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, image: fishImage};
+     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, lastTime: 0, image: fishImage};
   }
 });
 
@@ -31,21 +32,21 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
       fishInfo.y + fishInfo.height > shadowCanvas.height) {
     return true;
   }
-  for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_THRESHOLD; dx++) {
-    for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_THRESHOLD; dy++) {
+  for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
+    for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
       var x = fishInfo.x + dx;
       if (fishInfo.xSpeed < 0) {
-        x -= CHANGE_DIR_THRESHOLD; // check left instead of right
+        x -= CHANGE_DIR_PX_THRESHOLD; // check left instead of right
       }
       var y = fishInfo.y + dy;
       if (fishInfo.ySpeed < 0) {
-        y -= CHANGE_DIR_THRESHOLD; // check top instead of bottom
+        y -= CHANGE_DIR_PX_THRESHOLD; // check top instead of bottom
       }
       var i = 4*(y*shadowCanvas.width + x);
-      //alert("hi");
-      //console.log(i);
+      if (i < 0 || i > shadowData.length - 1) {
+        continue;
+      }
       if (shadowData[i] == OVERLAY && shadowData[i+1] == OVERLAY && shadowData[i+2] == OVERLAY) {
-        console.log("here");
         return true;
       }
     }
@@ -113,8 +114,12 @@ function renderShadow() {
       fishInfo.x += fishInfo.xSpeed;
       fishInfo.y += fishInfo.ySpeed;
       if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
-        fishInfo.xSpeed *= -1;
-        fishInfo.ySpeed *= -1;
+        var time = (new Date()).getTime();
+        if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
+          fishInfo.xSpeed *= -1;
+          fishInfo.ySpeed *= -1;
+          fishInfo.lastTime = time;
+        }
       }
     }
   }
