@@ -88,7 +88,9 @@ function renderShadow() {
           //shadowContext.fill();
           //shadowContext.closePath();
 		  
-		   shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
+		 shadowContext.rotate(0.20);
+		  shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
+		  shadowContext.restore(); 
           fishInfo.x += fishInfo.speed;
           if (changeDirection(fishInfo)) {
             fishInfo.speed *= -1;
