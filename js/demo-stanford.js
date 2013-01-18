@@ -118,7 +118,7 @@ function clearScratchCanvas() {
 		imgData.data[i+0]=255;
 		imgData.data[i+1]=255;
 		imgData.data[i+2]=255;
-		imgData.data[i+3]=127;
+		imgData.data[i+3]=0;
 	}
 	scratchContext.putImageData(imgData,0,0);
 }
