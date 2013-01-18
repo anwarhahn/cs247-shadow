@@ -126,6 +126,16 @@ function clamp(num, min, max) {
   return num;
 }
 
+/* 
+ * Returns true when fish is red. False if not.
+ */
+function isRed(fish){
+	if(fish.image.src.indexOf("/images/fish_r.png") == -1){
+		return false;
+	} else {
+		return true;
+	}
+}
 
 /*
  * In this example, we show you how to overlay the shadow information over
@@ -173,8 +183,7 @@ function renderShadow() {
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
       var time = Date.now();
-      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
-        fishes[ii].image.src.indexOf("/images/fish_r.png") != -1){
+      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD && isRed(fishes[ii])){
         fishes[ii].image.src = IMAGE_PATH + fishGallery[fishes[ii].imageID];
       }	
       fishInfo = fishes[ii];
@@ -187,7 +196,7 @@ function renderShadow() {
       } else if (dir == ChangeDirEnum.SHADOW) {
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
 			fishes[ii].numDirChanges++;
-			if(fishes[ii].numDirChanges > 4){
+			if(fishes[ii].numDirChanges > 4 && !isRed(fishes[ii])){
 				fishes[ii].image.src = "../images/fish_r.png";
 			}
 			fishInfo.xSpeed *= -1;
