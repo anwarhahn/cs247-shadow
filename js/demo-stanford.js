@@ -1,6 +1,5 @@
 var IMG_SRC  = 'media/underwater.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
-var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
@@ -22,8 +21,8 @@ $(document).ready(function() {
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
    fishImage.src = fishGallery[ii%2];
-   fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
-                 xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
+   fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, angle: 20*Math.PI/180, 
+                 xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 7, 
                  lastTime: 0, image: fishImage};
   }
 });
@@ -31,15 +30,22 @@ $(document).ready(function() {
 var ChangeDirEnum = {
   NONE : 0,
   SHADOW : 1,
-  EDGE : 2
+  LEFT_OR_RIGHT_EDGE : 2,
+  TOP_OR_BOTTOM_EDGE : 3
 }
 
 function changeDirection(fishInfo, shadowCanvas, shadowData) {
-  if (fishInfo.x < 0 ||
-      fishInfo.x + fishInfo.width > shadowCanvas.width ||
-      fishInfo.y < 0 ||
-      fishInfo.y + fishInfo.height > shadowCanvas.height) {
-    return ChangeDirEnum.EDGE;
+  if (fishInfo.x - fishInfo.width/2.0 < 0 && fishInfo.xSpeed < 0) {
+    return ChangeDirEnum.LEFT_OR_RIGHT_EDGE;
+  }
+  if (fishInfo.x + fishInfo.width/2.0 > shadowCanvas.width && fishInfo.xSpeed > 0) {
+    return ChangeDirEnum.LEFT_OR_RIGHT_EDGE;
+  }
+  if (fishInfo.y - fishInfo.height/2.0 < 0 && fishInfo.ySpeed < 0) {
+    return ChangeDirEnum.TOP_OR_BOTTOM_EDGE;
+  }
+  if (fishInfo.y + fishInfo.height/2.0 > shadowCanvas.height && fishInfo.ySpeed > 0) {
+    return ChangeDirEnum.TOP_OR_BOTTOM_EDGE;
   }
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
     for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
@@ -66,6 +72,19 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
 function toggleDebugShadow() {
     SHOW_DEBUG_SHADOW = !SHOW_DEBUG_SHADOW;
 }
+
+function clearScratchCanvas() {    
+    var imgData = scratchContext.createImageData(scratchCanvas.width, scratchCanvas.height);
+    for (var i = 0; i < imgData.data.length; i += 4)
+    {
+        imgData.data[i+0]=255;
+        imgData.data[i+1]=255;
+        imgData.data[i+2]=255;
+        imgData.data[i+3]=127;
+    }
+    scratchContext.putImageData(imgData,0,0);
+}
+
 
 function printFishInfo() {
   console.log(fishes);
@@ -137,33 +156,49 @@ function renderShadow() {
     // And now, paint our pixels array back to the canvas.
     shadowContext.putImageData(pixels, 0, 0);
 
+    clearScratchCanvas();
+
+
     for (var ii = 0; ii < NUM_FISHES; ii++) {
       var time = (new Date()).getTime();
       if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
         fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
-        fishes[ii].image.src = "../images/fish_yellow.png";
+        fishes[ii].image.src = "images/fish_yellow.png";
       }	
       fishInfo = fishes[ii];
-      shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
+      scratchContext.save();
+      scratchContext.translate(fishInfo.x, fishInfo.y);
+      scratchContext.rotate(fishInfo.angle);
+      scratchContext.translate(-1*fishInfo.x - fishInfo.width / 2.0, -1*fishInfo.y - fishInfo.height / 2.0);
+      scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);      
+      scratchContext.restore();
+            
+
+      fishInfo.x += fishInfo.xSpeed * Math.cos(fishInfo.angle);
+      fishInfo.y += fishInfo.ySpeed * Math.sin(fishInfo.angle);
+
 
       var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
-      if (dir == ChangeDirEnum.EDGE) {
-        fishInfo.xSpeed *= -1;
+      if (dir == ChangeDirEnum.TOP_OR_BOTTOM_EDGE) {
         fishInfo.ySpeed *= -1;
-      } else if (dir == ChangeDirEnum.SHADOW) {
+      } 
+      else if (dir == ChangeDirEnum.LEFT_OR_RIGHT_EDGE) {
+        fishInfo.xSpeed *= -1;
+      }
+      else if (dir == ChangeDirEnum.SHADOW) {
         var time = Date.now();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
-          fishes[ii].image.src = "../images/fish_yellow_r.png";
+          fishes[ii].image.src = "images/fish_yellow_r.png";
           fishInfo.xSpeed *= -1;
           fishInfo.ySpeed *= -1;
           fishInfo.lastTime = time;
         }
       }
-      var multiplier = calculateSpeedMultiplier(fishInfo);
-      fishInfo.x += multiplier*fishInfo.xSpeed;
-      fishInfo.x = clamp(fishInfo.x, -1, shadowCanvas.width-fishInfo.width);
-      fishInfo.y += multiplier*fishInfo.ySpeed;
-      fishInfo.y = clamp(fishInfo.y, -1, shadowCanvas.height-fishInfo.height);
+      // var multiplier = calculateSpeedMultiplier(fishInfo);
+      // fishInfo.x += multiplier*fishInfo.xSpeed;
+      // fishInfo.x = clamp(fishInfo.x, -1, shadowCanvas.width-fishInfo.width);
+      // fishInfo.y += multiplier*fishInfo.ySpeed;
+      // fishInfo.y = clamp(fishInfo.y, -1, shadowCanvas.height-fishInfo.height);
     }
   }
 
