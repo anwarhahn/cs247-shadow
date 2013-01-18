@@ -5,13 +5,17 @@ var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
 var PX_FOR_SHADOW = 20; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
-var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
+var CHANGE_DIR_MS_THRESHOLD = 1000; // number of ms before fish change direction again
 var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
+var TIME_STUCK = 4000; // time that a fish spends being stuck
+var IMAGE_PATH = "../images/fish_";
 var FISH_IMG_WIDTH = 50;
 var FISH_IMG_HEIGHT = 30;
 
 // array of fish images. default fish face right 0 degrees.
-var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
+var fishGallery = ["yellow.png", "green.png", "light_blue.png",
+				   "green_blue_orange.png", "green_red.png", 
+				   "dark_blue.png"];
 var fishes = [];
 var stanfordImage;
 var imageReady = false;
@@ -36,7 +40,8 @@ $(document).ready(function() {
 
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
-   fishImage.src = fishGallery[ii%2];
+   var imageId = ii%6;
+   fishImage.src = IMAGE_PATH + fishGallery[imageId];
    fishes[ii] = {x: randomInt(0, shadowCanvas.width - FISH_IMG_WIDTH),
                  y: randomInt(0, shadowCanvas.height - FISH_IMG_HEIGHT),
                  width: FISH_IMG_WIDTH,
@@ -44,7 +49,9 @@ $(document).ready(function() {
                  xSpeed: randomSign() * randomInt(3, 6),
                  ySpeed: randomSign() * randomInt(1, 2), 
                  lastTime: 0,
-                 image: fishImage};
+				 imageID: imageId,
+                 image: fishImage,
+				 numDirChanges: 0};
   }
 });
 
@@ -119,6 +126,16 @@ function clamp(num, min, max) {
   return num;
 }
 
+/* 
+ * Returns true when fish is red. False if not.
+ */
+function isRed(fish){
+	if(fish.image.src.indexOf("/images/fish_r.png") == -1){
+		return false;
+	} else {
+		return true;
+	}
+}
 
 /*
  * In this example, we show you how to overlay the shadow information over
@@ -166,7 +183,11 @@ function renderShadow() {
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
       var time = Date.now();
+      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD && isRed(fishes[ii])){
+        fishes[ii].image.src = IMAGE_PATH + fishGallery[fishes[ii].imageID];
+      }	
       fishInfo = fishes[ii];
+	 
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
       var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
       if (dir == ChangeDirEnum.EDGE) {
@@ -174,10 +195,13 @@ function renderShadow() {
         fishInfo.ySpeed *= -1;
       } else if (dir == ChangeDirEnum.SHADOW) {
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
-          fishes[ii].image.src = "../images/fish_yellow_r.png";
-          fishInfo.xSpeed *= -1;
-          fishInfo.ySpeed *= -1;
-          fishInfo.lastTime = time;
+			fishes[ii].numDirChanges++;
+			if(fishes[ii].numDirChanges > 4 && !isRed(fishes[ii])){
+				fishes[ii].image.src = "../images/fish_r.png";
+			}
+			fishInfo.xSpeed *= -1;
+			fishInfo.ySpeed *= -1;
+			fishInfo.lastTime = time;
         }
       } else {
         if (time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
