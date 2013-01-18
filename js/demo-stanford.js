@@ -64,6 +64,7 @@ var ChangeDirEnum = {
 function changeDirection(fishInfo, shadowCanvas, shadowData) {
   if (fishInfo.x - fishInfo.width/2.0 < 0 && fishInfo.xSpeed < 0) {
     return ChangeDirEnum.LEFT_OR_RIGHT_EDGE;
+  }
   if (fishInfo.x < 0 ||
       fishInfo.x + fishInfo.width > shadowCanvas.width ||
       fishInfo.y < 0 ||
@@ -154,7 +155,7 @@ function clamp(num, min, max) {
  * Returns true when fish is red. False if not.
  */
 function isRed(fish){
-	if(fish.image.src.indexOf("/images/fish_r.png") == -1){
+	if(fish.image.src.indexOf("../images/fish_r.png") == -1){
 		return false;
 	} else {
 		return true;
