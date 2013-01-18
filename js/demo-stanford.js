@@ -251,8 +251,8 @@ function renderShadow() {
 			}
 			else {
 				if (time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
-					fishes[ii].image.src.indexOf("images/fish_yellow_r.png") != -1){
-					fishes[ii].image.src = "images/fish_yellow.png";
+					fishes[ii].image.src.indexOf("images/fish_r.png") != -1){
+					fishes[ii].image.src = IMAGE_PATH + fishGallery[fishes[ii].imageID];
 				}
 			}
 			var multiplier = calculateSpeedMultiplier(fishInfo);
