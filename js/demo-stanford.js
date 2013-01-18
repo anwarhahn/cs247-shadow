@@ -5,6 +5,7 @@ var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
 var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
+var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
 
 // array of fish images. default fish face right 0 degrees.
 var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
@@ -21,24 +22,36 @@ $(document).ready(function() {
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
    fishImage.src = fishGallery[ii%2];
+     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
+	               xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
+				   lastTime: 0, image: fishImage, outOfBounds: false};
      fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, xSpeed: Math.round(10*Math.random()) + -5, ySpeed: Math.round(10*Math.random()) - 5, xBounce: Math.round(6*Math.random()) -3, yBounce: Math.round(6*Math.random())-3, lastTime: 0, image: fishImage};
   }
 });
+
+var ChangeDirEnum = {
+  NONE : 0,
+  SHADOW : 1,
+  EDGE : 2
+}
 
 function changeDirection(fishInfo, shadowCanvas, shadowData) {
   if (fishInfo.x < 0 ||
       fishInfo.x + fishInfo.width > shadowCanvas.width ||
       fishInfo.y < 0 ||
       fishInfo.y + fishInfo.height > shadowCanvas.height) {
-    return true;
+
+	  fishInfo.outOfBounds = true;
+    return ChangeDirEnum.EDGE;
   }
+  fishInfo.outOfBounds = false;
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
     for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
-      var x = fishInfo.x + dx;
+      var x = Math.round(fishInfo.x + dx);
       if (fishInfo.xSpeed < 0) {
         x -= CHANGE_DIR_PX_THRESHOLD; // check left instead of right
       }
-      var y = fishInfo.y + dy;
+      var y = Math.round(fishInfo.y + dy);
       if (fishInfo.ySpeed < 0) {
         y -= CHANGE_DIR_PX_THRESHOLD; // check top instead of bottom
       }
@@ -47,15 +60,40 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
         continue;
       }
       if (shadowData[i] == OVERLAY && shadowData[i+1] == OVERLAY && shadowData[i+2] == OVERLAY) {
-        return true;
+        return ChangeDirEnum.SHADOW;
       }
     }
   }
-  return false;
+  return ChangeDirEnum.NONE;
 }
 
 function toggleDebugShadow() {
     SHOW_DEBUG_SHADOW = !SHOW_DEBUG_SHADOW;
+}
+
+function printFishInfo() {
+  console.log(fishes);
+}
+
+function calculateSpeedMultiplier(fishInfo) {
+  var curTime = Date.now();
+  var lastTime = fishInfo.lastTime;
+  var diff = curTime - lastTime;
+  var part1 = CHANGE_DIR_MS_THRESHOLD / 5;
+  var part2 = CHANGE_DIR_MS_THRESHOLD - part1;
+  if (diff > CHANGE_DIR_MS_THRESHOLD) {
+    return 1;
+  } else if (diff <= part1) {
+    return 1 + (MAX_SPEED_MULTIPLIER-1) * diff / part1;
+  } else {
+    return MAX_SPEED_MULTIPLIER - (MAX_SPEED_MULTIPLIER-1) * (diff - part1) / part2;
+  }
+}
+
+function clamp(num, min, max) {
+  if (num < min) return min;
+  if (num > max) return max;
+  return num;
 }
 
 
@@ -104,13 +142,23 @@ function renderShadow() {
     shadowContext.putImageData(pixels, 0, 0);
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
+		var time = (new Date()).getTime();
+		if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
+			fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
+			fishes[ii].image.src = "../images/fish_yellow.png";
+		}	
       fishInfo = fishes[ii];
-      //shadowContext.beginPath();
-      //shadowContext.arc(fishInfo.x,fishInfo.y,fishInfo.width,0,360,true);
-      //shadowContext.fill();
-      //shadowContext.closePath();
-  
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
+
+      //console.log(multiplier);
+      var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
+      //console.log(dir);
+      if (dir == ChangeDirEnum.EDGE) {
+        fishInfo.xSpeed *= -1;
+        fishInfo.ySpeed *= -1;
+      } else if (dir == ChangeDirEnum.SHADOW) {
+        var time = Date.now();
+        console.log(time + " : " + fishInfo.lastTime);
       fishInfo.x += fishInfo.xSpeed;
       fishInfo.y += fishInfo.ySpeed;
  //     fishInfo.x += fishInfo.xBounce;
@@ -118,11 +166,19 @@ function renderShadow() {
       if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
         var time = (new Date()).getTime();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
+		  if(!fishInfo.outOfBounds){
+			fishes[ii].image.src = "../images/fish_yellow_r.png";
+		   }
           fishInfo.xSpeed *= -1;
           fishInfo.ySpeed *= -1;
           fishInfo.lastTime = time;
         }
       }
+      var multiplier = calculateSpeedMultiplier(fishInfo);
+      fishInfo.x += multiplier*fishInfo.xSpeed;
+      fishInfo.x = clamp(fishInfo.x, -1, shadowCanvas.width-fishInfo.width);
+      fishInfo.y += multiplier*fishInfo.ySpeed;
+      fishInfo.y = clamp(fishInfo.y, -1, shadowCanvas.height-fishInfo.height);
     }
   }
 
