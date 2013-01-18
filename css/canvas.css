@@ -1,0 +1,16 @@
+#shadowCanvas {
+	position: absolute;
+	left:20px;
+	top:40px;
+	z-index: 0;
+}
+#scratchCanvas {
+	position: absolute;
+	left:20px;
+	top:40px;
+	z-index: 1;
+}
+
+#capture {
+	position: relative;
+}

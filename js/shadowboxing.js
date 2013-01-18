@@ -32,7 +32,7 @@ var STACK_BLUR_RADIUS = 10;
 /*
  * Begin shadowboxing code
  */
-var mediaStream, video, rawCanvas, rawContext, shadowCanvas, shadowContext, background = null;
+var mediaStream, video, rawCanvas, rawContext, scratchCanvas, scratchContext, shadowCanvas, shadowContext, background = null;
 var kinect, kinectSocket = null;
 
 var started = false;
@@ -73,12 +73,23 @@ function initializeDOMElements() {
     // mirror horizontally, so it acts like a reflection
     rawContext.translate(rawCanvas.width, 0);
     rawContext.scale(-1,1);    
+
+    scratchCanvas = document.createElement('canvas');
+    scratchCanvas.setAttribute('id', 'scratchCanvas');
+    scratchCanvas.setAttribute('width', 640);
+    scratchCanvas.setAttribute('height', 480);
+    document.getElementById('capture').appendChild(scratchCanvas);
+    scratchContext = scratchCanvas.getContext('2d');
+    // mirror horizontally, so it acts like a reflection
+    scratchContext.translate(scratchCanvas.width, 0);
+    scratchContext.scale(-1,1);    
+
     
     shadowCanvas = document.createElement('canvas');
     shadowCanvas.setAttribute('id', 'shadowCanvas');
     shadowCanvas.setAttribute('width', 640);
     shadowCanvas.setAttribute('height', 480);
-    shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
+    //shadowCanvas.style.display = SHOW_SHADOW ? 'block' : 'none';
     document.getElementById('capture').appendChild(shadowCanvas);
     shadowContext = shadowCanvas.getContext('2d');    
 }
