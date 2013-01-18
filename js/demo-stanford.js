@@ -21,7 +21,7 @@ $(document).ready(function() {
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
    fishImage.src = fishGallery[ii%2];
-     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, lastTime: 0, image: fishImage};
+     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, xSpeed: Math.round(10*Math.random()) + -5, ySpeed: Math.round(10*Math.random()) - 5, xBounce: Math.round(6*Math.random()) -3, yBounce: Math.round(6*Math.random())-3, lastTime: 0, image: fishImage};
   }
 });
 
@@ -113,6 +113,8 @@ function renderShadow() {
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
       fishInfo.x += fishInfo.xSpeed;
       fishInfo.y += fishInfo.ySpeed;
+ //     fishInfo.x += fishInfo.xBounce;
+      fishInfo.y += fishInfo.yBounce;
       if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
         var time = (new Date()).getTime();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
