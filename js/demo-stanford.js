@@ -142,33 +142,22 @@ function renderShadow() {
     shadowContext.putImageData(pixels, 0, 0);
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
-		var time = (new Date()).getTime();
-		if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
-			fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
-			fishes[ii].image.src = "../images/fish_yellow.png";
-		}	
+      var time = (new Date()).getTime();
+      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
+        fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
+        fishes[ii].image.src = "../images/fish_yellow.png";
+      }	
       fishInfo = fishes[ii];
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
 
-      //console.log(multiplier);
       var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
-      //console.log(dir);
       if (dir == ChangeDirEnum.EDGE) {
         fishInfo.xSpeed *= -1;
         fishInfo.ySpeed *= -1;
       } else if (dir == ChangeDirEnum.SHADOW) {
         var time = Date.now();
-        console.log(time + " : " + fishInfo.lastTime);
-      fishInfo.x += fishInfo.xSpeed;
-      fishInfo.y += fishInfo.ySpeed;
- //     fishInfo.x += fishInfo.xBounce;
-      fishInfo.y += fishInfo.yBounce;
-      if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
-        var time = (new Date()).getTime();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
-		  if(!fishInfo.outOfBounds){
-			fishes[ii].image.src = "../images/fish_yellow_r.png";
-		   }
+          fishes[ii].image.src = "../images/fish_yellow_r.png";
           fishInfo.xSpeed *= -1;
           fishInfo.ySpeed *= -1;
           fishInfo.lastTime = time;
