@@ -3,6 +3,7 @@ var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
+var PX_FOR_SHADOW = 20; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
 var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
 var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
@@ -63,6 +64,7 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
     return ChangeDirEnum.EDGE;
   }
   fishInfo.outOfBounds = false;
+  var count = 0;
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
     for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
       var x = Math.round(fishInfo.x + dx);
@@ -78,7 +80,10 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
         continue;
       }
       if (shadowData[i] == OVERLAY && shadowData[i+1] == OVERLAY && shadowData[i+2] == OVERLAY) {
-        return ChangeDirEnum.SHADOW;
+        count++;
+        if (count >= PX_FOR_SHADOW) {
+          return ChangeDirEnum.SHADOW;
+        }
       }
     }
   }
