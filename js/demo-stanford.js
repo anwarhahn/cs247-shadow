@@ -152,7 +152,6 @@ function renderShadow() {
         fishInfo.ySpeed *= -1;
       } else if (dir == ChangeDirEnum.SHADOW) {
         var time = Date.now();
-        console.log(time + " : " + fishInfo.lastTime);
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
           fishes[ii].image.src = "../images/fish_yellow_r.png";
           fishInfo.xSpeed *= -1;
