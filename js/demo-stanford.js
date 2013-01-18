@@ -137,11 +137,6 @@ function renderShadow() {
 			fishes[ii].image.src = "../images/fish_yellow.png";
 		}	
       fishInfo = fishes[ii];
-      //shadowContext.beginPath();
-      //shadowContext.arc(fishInfo.x,fishInfo.y,fishInfo.width,0,360,true);
-      //shadowContext.fill();
-      //shadowContext.closePath();
-    
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
 
       //console.log(multiplier);
@@ -152,7 +147,6 @@ function renderShadow() {
         fishInfo.ySpeed *= -1;
       } else if (dir == ChangeDirEnum.SHADOW) {
         var time = (new Date()).getTime();
-\
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
 		  if(!fishInfo.outOfBounds){
 			fishes[ii].image.src = "../images/fish_yellow_r.png";
