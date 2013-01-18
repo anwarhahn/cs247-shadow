@@ -4,8 +4,9 @@ var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
-var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
+var CHANGE_DIR_MS_THRESHOLD = 1000; // number of ms before fish change direction again
 var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
+var TIME_STUCK = 4000; // time that a fish spends being stuck
 
 // array of fish images. default fish face right 0 degrees.
 var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
@@ -24,7 +25,8 @@ $(document).ready(function() {
    fishImage.src = fishGallery[ii%2];
      fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
 	               xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
-				   lastTime: 0, image: fishImage, outOfBounds: false};
+				   lastTime: 0, image: fishImage, outOfBounds: false, 
+				   numDirChanges: 0};
   }
 });
 
@@ -132,9 +134,10 @@ function renderShadow() {
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
 		var time = (new Date()).getTime();
-		if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
-			fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
+		if(time - fishes[ii].lastTime > TIME_STUCK &&
+			fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1 ){
 			fishes[ii].image.src = "../images/fish_yellow.png";
+			fishes[ii].numDirChanges  = 0;
 		}	
       fishInfo = fishes[ii];
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
@@ -149,7 +152,10 @@ function renderShadow() {
         var time = (new Date()).getTime();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
 		  if(!fishInfo.outOfBounds){
-			fishes[ii].image.src = "../images/fish_yellow_r.png";
+			fishes[ii].numDirChanges++;
+			if(fishes[ii].numDirChanges > 4){
+				fishes[ii].image.src = "../images/fish_yellow_r.png";
+			}
 		   }
           fishInfo.xSpeed *= -1;
           fishInfo.ySpeed *= -1;
