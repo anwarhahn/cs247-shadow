@@ -186,7 +186,7 @@ function renderShadow() {
         }
       }
       var multiplier = calculateSpeedMultiplier(fishInfo);
-      var xBounce = Math.round(6*Math.random()) -3;
+      var xBounce = 0;//Math.round(6*Math.random()) -3;
       var yBounce = Math.round(6*Math.random()) -3;
       fishInfo.x += multiplier*fishInfo.xSpeed;
       fishInfo.x = clamp(fishInfo.x + xBounce, -1, shadowCanvas.width-fishInfo.width+1);
