@@ -6,12 +6,26 @@ var NUM_FISHES = 10;
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
 var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
 var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
+var FISH_IMG_WIDTH = 50;
+var FISH_IMG_HEIGHT = 30;
 
 // array of fish images. default fish face right 0 degrees.
 var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
 var fishes = [];
 var stanfordImage;
 var imageReady = false;
+
+function randomSign() {
+  if (Math.random() < 0.5) {
+    return 1;
+  }
+  return -1;
+}
+
+function randomInt(min, max) {
+  return Math.round(min + Math.random() * (max-min));
+}
+
 $(document).ready(function() {
   stanfordImage = new Image();
   stanfordImage.src = IMG_SRC;
@@ -22,10 +36,15 @@ $(document).ready(function() {
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
    fishImage.src = fishGallery[ii%2];
-     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
-	               xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
-				   lastTime: 0, image: fishImage, outOfBounds: false};
-     }
+   fishes[ii] = {x: randomInt(0, shadowCanvas.width - FISH_IMG_WIDTH),
+                 y: randomInt(0, shadowCanvas.height - FISH_IMG_HEIGHT),
+                 width: FISH_IMG_WIDTH,
+                 height: FISH_IMG_HEIGHT, 
+                 xSpeed: randomSign() * randomInt(3, 6),
+                 ySpeed: randomSign() * randomInt(1, 2), 
+                 lastTime: 0,
+                 image: fishImage};
+  }
 });
 
 var ChangeDirEnum = {
@@ -141,7 +160,7 @@ function renderShadow() {
     shadowContext.putImageData(pixels, 0, 0);
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
-      var time = (new Date()).getTime();
+      var time = Date.now();
       if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
         fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
         fishes[ii].image.src = "../images/fish_yellow.png";
