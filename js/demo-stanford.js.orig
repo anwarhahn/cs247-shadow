@@ -1,35 +1,17 @@
 var IMG_SRC  = 'media/underwater.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
+var NUM_FISHES = 10;
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
-var PX_FOR_SHADOW = 20; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
-var CHANGE_DIR_MS_THRESHOLD = 1000; // number of ms before fish change direction again
+var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
 var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
-var TIME_STUCK = 4000; // time that a fish spends being stuck
-var IMAGE_PATH = "../images/fish_";
-var FISH_IMG_WIDTH = 50;
-var FISH_IMG_HEIGHT = 30;
 
 // array of fish images. default fish face right 0 degrees.
-var fishGallery = ["yellow.png", "green.png", "light_blue.png",
-				   "green_blue_orange.png", "green_red.png", 
-				   "dark_blue.png"];
+var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
 var fishes = [];
 var stanfordImage;
 var imageReady = false;
-
-function randomSign() {
-  if (Math.random() < 0.5) {
-    return 1;
-  }
-  return -1;
-}
-
-function randomInt(min, max) {
-  return Math.round(min + Math.random() * (max-min));
-}
-
 $(document).ready(function() {
   stanfordImage = new Image();
   stanfordImage.src = IMG_SRC;
@@ -39,50 +21,34 @@ $(document).ready(function() {
 
   for (var ii = 0; ii < NUM_FISHES; ii++) {
    var fishImage = new Image();
-   var imageId = ii%6;
-   fishImage.src = IMAGE_PATH + fishGallery[imageId];
-   fishes[ii] = {x: randomInt(0, shadowCanvas.width - FISH_IMG_WIDTH),
-                 y: randomInt(0, shadowCanvas.height - FISH_IMG_HEIGHT),
-                 width: FISH_IMG_WIDTH,
-                 height: FISH_IMG_HEIGHT, 
-                 xSpeed: randomSign() * randomInt(3, 6),
-                 ySpeed: randomSign() * randomInt(1, 2), 
-                 lastTime: 0,
-				 imageID: imageId,
-                 image: fishImage,
-				 numDirChanges: 0};
+   fishImage.src = fishGallery[ii%2];
+<<<<<<< HEAD
+     fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
+	               xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
+                 xBounce: Math.round(6*Math.random()) -3, yBounce: Math.round(6*Math.random())-3,
+				   lastTime: 0, image: fishImage, outOfBounds: false};
+     }
+=======
+   fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
+                 xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
+                 lastTime: 0, image: fishImage};
   }
+>>>>>>> 20f5fae4421633d7adab3f592192a98b17d5832a
 });
 
 var ChangeDirEnum = {
   NONE : 0,
   SHADOW : 1,
-  LEFT_OR_RIGHT_EDGE : 2,
-  TOP_OR_BOTTOM_EDGE : 3
+  EDGE : 2
 }
 
 function changeDirection(fishInfo, shadowCanvas, shadowData) {
-  if (fishInfo.x - fishInfo.width/2.0 < 0 && fishInfo.xSpeed < 0) {
-    return ChangeDirEnum.LEFT_OR_RIGHT_EDGE;
   if (fishInfo.x < 0 ||
       fishInfo.x + fishInfo.width > shadowCanvas.width ||
       fishInfo.y < 0 ||
       fishInfo.y + fishInfo.height > shadowCanvas.height) {
-
-	  fishInfo.outOfBounds = true;
     return ChangeDirEnum.EDGE;
   }
-  if (fishInfo.x + fishInfo.width/2.0 > shadowCanvas.width && fishInfo.xSpeed > 0) {
-    return ChangeDirEnum.LEFT_OR_RIGHT_EDGE;
-  }
-  if (fishInfo.y - fishInfo.height/2.0 < 0 && fishInfo.ySpeed < 0) {
-    return ChangeDirEnum.TOP_OR_BOTTOM_EDGE;
-  }
-  if (fishInfo.y + fishInfo.height/2.0 > shadowCanvas.height && fishInfo.ySpeed > 0) {
-    return ChangeDirEnum.TOP_OR_BOTTOM_EDGE;
-  }
-  fishInfo.outOfBounds = false;
-  var count = 0;
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
     for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
       var x = Math.round(fishInfo.x + dx);
@@ -98,10 +64,7 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
         continue;
       }
       if (shadowData[i] == OVERLAY && shadowData[i+1] == OVERLAY && shadowData[i+2] == OVERLAY) {
-        count++;
-        if (count >= PX_FOR_SHADOW) {
-          return ChangeDirEnum.SHADOW;
-        }
+        return ChangeDirEnum.SHADOW;
       }
     }
   }
@@ -111,19 +74,6 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
 function toggleDebugShadow() {
     SHOW_DEBUG_SHADOW = !SHOW_DEBUG_SHADOW;
 }
-
-function clearScratchCanvas() {    
-    var imgData = scratchContext.createImageData(scratchCanvas.width, scratchCanvas.height);
-    for (var i = 0; i < imgData.data.length; i += 4)
-    {
-        imgData.data[i+0]=255;
-        imgData.data[i+1]=255;
-        imgData.data[i+2]=255;
-        imgData.data[i+3]=127;
-    }
-    scratchContext.putImageData(imgData,0,0);
-}
-
 
 function printFishInfo() {
   console.log(fishes);
@@ -150,16 +100,6 @@ function clamp(num, min, max) {
   return num;
 }
 
-/* 
- * Returns true when fish is red. False if not.
- */
-function isRed(fish){
-	if(fish.image.src.indexOf("/images/fish_r.png") == -1){
-		return false;
-	} else {
-		return true;
-	}
-}
 
 /*
  * In this example, we show you how to overlay the shadow information over
@@ -205,58 +145,43 @@ function renderShadow() {
     // And now, paint our pixels array back to the canvas.
     shadowContext.putImageData(pixels, 0, 0);
 
-    clearScratchCanvas();
-
-
     for (var ii = 0; ii < NUM_FISHES; ii++) {
-      var time = Date.now();
-      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD && isRed(fishes[ii])){
-        fishes[ii].image.src = IMAGE_PATH + fishGallery[fishes[ii].imageID];
+      var time = (new Date()).getTime();
+      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
+        fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
+        fishes[ii].image.src = "../images/fish_yellow.png";
       }	
       fishInfo = fishes[ii];
-      scratchContext.save();
-      scratchContext.translate(fishInfo.x, fishInfo.y);
-      scratchContext.rotate(fishInfo.angle);
-      scratchContext.translate(-1*fishInfo.x - fishInfo.width / 2.0, -1*fishInfo.y - fishInfo.height / 2.0);
-      scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);      
-      scratchContext.restore();
-            
-
-      fishInfo.x += fishInfo.xSpeed * Math.cos(fishInfo.angle);
-      fishInfo.y += fishInfo.ySpeed * Math.sin(fishInfo.angle);
-
+      shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
 
       var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
-      if (dir == ChangeDirEnum.TOP_OR_BOTTOM_EDGE) {
-        fishInfo.ySpeed *= -1;
-      } 
-      else if (dir == ChangeDirEnum.LEFT_OR_RIGHT_EDGE) {
+      if (dir == ChangeDirEnum.EDGE) {
         fishInfo.xSpeed *= -1;
-      }
-      else if (dir == ChangeDirEnum.SHADOW) {
+        fishInfo.ySpeed *= -1;
+      } else if (dir == ChangeDirEnum.SHADOW) {
         var time = Date.now();
+<<<<<<< HEAD
+        console.log(time + " : " + fishInfo.lastTime);
+      fishInfo.x += fishInfo.xSpeed;
+      fishInfo.y += fishInfo.ySpeed;
+ //     fishInfo.x += fishInfo.xBounce;
+      fishInfo.y += fishInfo.yBounce;
+      if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
+        var time = (new Date()).getTime();
+=======
+>>>>>>> 20f5fae4421633d7adab3f592192a98b17d5832a
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
-			fishes[ii].numDirChanges++;
-			if(fishes[ii].numDirChanges > 4 && !isRed(fishes[ii])){
-				fishes[ii].image.src = "../images/fish_r.png";
-			}
-			fishInfo.xSpeed *= -1;
-			fishInfo.ySpeed *= -1;
-			fishInfo.lastTime = time;
-        }
-      } else {
-        if (time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
-            fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
-          fishes[ii].image.src = "../images/fish_yellow.png";
+          fishes[ii].image.src = "../images/fish_yellow_r.png";
+          fishInfo.xSpeed *= -1;
+          fishInfo.ySpeed *= -1;
+          fishInfo.lastTime = time;
         }
       }
       var multiplier = calculateSpeedMultiplier(fishInfo);
-      var xBounce = Math.round(6*Math.random()) -3;
-      var yBounce = Math.round(6*Math.random()) -3;
       fishInfo.x += multiplier*fishInfo.xSpeed;
-      fishInfo.x = clamp(fishInfo.x + xBounce, -1, shadowCanvas.width-fishInfo.width+1);
+      fishInfo.x = clamp(fishInfo.x, -1, shadowCanvas.width-fishInfo.width);
       fishInfo.y += multiplier*fishInfo.ySpeed;
-      fishInfo.y = clamp(fishInfo.y + yBounce, -1, shadowCanvas.height-fishInfo.height+1);
+      fishInfo.y = clamp(fishInfo.y, -1, shadowCanvas.height-fishInfo.height);
     }
   }
 
