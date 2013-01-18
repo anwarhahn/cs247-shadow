@@ -46,11 +46,11 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
   fishInfo.outOfBounds = false;
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
     for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
-      var x = fishInfo.x + dx;
+      var x = Math.round(fishInfo.x + dx);
       if (fishInfo.xSpeed < 0) {
         x -= CHANGE_DIR_PX_THRESHOLD; // check left instead of right
       }
-      var y = fishInfo.y + dy;
+      var y = Math.round(fishInfo.y + dy);
       if (fishInfo.ySpeed < 0) {
         y -= CHANGE_DIR_PX_THRESHOLD; // check top instead of bottom
       }
@@ -70,8 +70,12 @@ function toggleDebugShadow() {
     SHOW_DEBUG_SHADOW = !SHOW_DEBUG_SHADOW;
 }
 
+function printFishInfo() {
+  console.log(fishes);
+}
+
 function calculateSpeedMultiplier(fishInfo) {
-  var curTime = (new Date()).getTime();
+  var curTime = Date.now();
   var lastTime = fishInfo.lastTime;
   var diff = curTime - lastTime;
   var part1 = CHANGE_DIR_MS_THRESHOLD / 5;
@@ -83,6 +87,12 @@ function calculateSpeedMultiplier(fishInfo) {
   } else {
     return MAX_SPEED_MULTIPLIER - (MAX_SPEED_MULTIPLIER-1) * (diff - part1) / part2;
   }
+}
+
+function clamp(num, min, max) {
+  if (num < min) return min;
+  if (num > max) return max;
+  return num;
 }
 
 
@@ -146,7 +156,8 @@ function renderShadow() {
         fishInfo.xSpeed *= -1;
         fishInfo.ySpeed *= -1;
       } else if (dir == ChangeDirEnum.SHADOW) {
-        var time = (new Date()).getTime();
+        var time = Date.now();
+        console.log(time + " : " + fishInfo.lastTime);
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
 		  if(!fishInfo.outOfBounds){
 			fishes[ii].image.src = "../images/fish_yellow_r.png";
@@ -157,10 +168,10 @@ function renderShadow() {
         }
       }
       var multiplier = calculateSpeedMultiplier(fishInfo);
-      // wendy: this seems buggy. if you keep the fish in the shadows they stop switching after a while..
-      // fishInfo.x += multiplier*fishInfo.xSpeed;
-      fishInfo.x += fishInfo.xSpeed;
-      fishInfo.y += fishInfo.ySpeed;
+      fishInfo.x += multiplier*fishInfo.xSpeed;
+      fishInfo.x = clamp(fishInfo.x, -1, shadowCanvas.width-fishInfo.width);
+      fishInfo.y += multiplier*fishInfo.ySpeed;
+      fishInfo.y = clamp(fishInfo.y, -1, shadowCanvas.height-fishInfo.height);
     }
   }
 
