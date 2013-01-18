@@ -5,6 +5,7 @@ var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
 var CHANGE_DIR_PX_THRESHOLD = 10; // number of pixels away from shadow before fish change direction
 var CHANGE_DIR_MS_THRESHOLD = 2000; // number of ms before fish change direction again
+var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
 
 // array of fish images. default fish face right 0 degrees.
 var fishGallery = ["../images/fish_yellow.png", "../images/fish_green.png"];
@@ -27,13 +28,20 @@ $(document).ready(function() {
   }
 });
 
+var ChangeDirEnum = {
+  NONE : 0,
+  SHADOW : 1,
+  EDGE : 2
+}
+
 function changeDirection(fishInfo, shadowCanvas, shadowData) {
   if (fishInfo.x < 0 ||
       fishInfo.x + fishInfo.width > shadowCanvas.width ||
       fishInfo.y < 0 ||
       fishInfo.y + fishInfo.height > shadowCanvas.height) {
+
 	  fishInfo.outOfBounds = true;
-    return true;
+    return ChangeDirEnum.EDGE;
   }
   fishInfo.outOfBounds = false;
   for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
@@ -51,15 +59,30 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
         continue;
       }
       if (shadowData[i] == OVERLAY && shadowData[i+1] == OVERLAY && shadowData[i+2] == OVERLAY) {
-        return true;
+        return ChangeDirEnum.SHADOW;
       }
     }
   }
-  return false;
+  return ChangeDirEnum.NONE;
 }
 
 function toggleDebugShadow() {
     SHOW_DEBUG_SHADOW = !SHOW_DEBUG_SHADOW;
+}
+
+function calculateSpeedMultiplier(fishInfo) {
+  var curTime = (new Date()).getTime();
+  var lastTime = fishInfo.lastTime;
+  var diff = curTime - lastTime;
+  var part1 = CHANGE_DIR_MS_THRESHOLD / 5;
+  var part2 = CHANGE_DIR_MS_THRESHOLD - part1;
+  if (diff > CHANGE_DIR_MS_THRESHOLD) {
+    return 1;
+  } else if (diff <= part1) {
+    return 1 + (MAX_SPEED_MULTIPLIER-1) * diff / part1;
+  } else {
+    return MAX_SPEED_MULTIPLIER - (MAX_SPEED_MULTIPLIER-1) * (diff - part1) / part2;
+  }
 }
 
 
@@ -120,11 +143,16 @@ function renderShadow() {
       //shadowContext.closePath();
     
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
-      fishInfo.x += fishInfo.xSpeed;
-      fishInfo.y += fishInfo.ySpeed;
-	  
-      if (changeDirection(fishInfo, shadowCanvas, shadow.data)) {
-        //var time = (new Date()).getTime();
+
+      //console.log(multiplier);
+      var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
+      //console.log(dir);
+      if (dir == ChangeDirEnum.EDGE) {
+        fishInfo.xSpeed *= -1;
+        fishInfo.ySpeed *= -1;
+      } else if (dir == ChangeDirEnum.SHADOW) {
+        var time = (new Date()).getTime();
+\
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
 		  if(!fishInfo.outOfBounds){
 			fishes[ii].image.src = "../images/fish_yellow_r.png";
@@ -134,6 +162,11 @@ function renderShadow() {
           fishInfo.lastTime = time;
         }
       }
+      var multiplier = calculateSpeedMultiplier(fishInfo);
+      // wendy: this seems buggy. if you keep the fish in the shadows they stop switching after a while..
+      // fishInfo.x += multiplier*fishInfo.xSpeed;
+      fishInfo.x += fishInfo.xSpeed;
+      fishInfo.y += fishInfo.ySpeed;
     }
   }
 
