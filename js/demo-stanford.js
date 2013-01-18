@@ -48,7 +48,7 @@ $(document).ready(function() {
 				 width: FISH_IMG_WIDTH,
 				 height: FISH_IMG_HEIGHT, 
 				 xSpeed: randomSign() * randomInt(3, 6),
-				 ySpeed: randomSign() * randomInt(1, 2), 
+				 ySpeed: randomSign() * randomInt(1, 7), 
 				 lastTime: 0,
 				 imageID: imageId,
 				 image: fishImage,
