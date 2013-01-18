@@ -24,7 +24,6 @@ $(document).ready(function() {
    fishImage.src = fishGallery[ii%2];
      fishes[ii] = {x: ii*10, y: ii*50, width: 50, height: 30, 
 	               xSpeed: Math.round(5*Math.random()) + 5, ySpeed: 0, 
-                 xBounce: Math.round(6*Math.random()) -3, yBounce: Math.round(6*Math.random())-3,
 				   lastTime: 0, image: fishImage, outOfBounds: false};
      }
 });
@@ -165,9 +164,9 @@ function renderShadow() {
       }
       var multiplier = calculateSpeedMultiplier(fishInfo);
       fishInfo.x += multiplier*fishInfo.xSpeed;
-      fishInfo.x = clamp(fishInfo.x, -1, shadowCanvas.width-fishInfo.width);
+      fishInfo.x = clamp(fishInfo.x + Math.round(6*Math.random()) -3, -1, shadowCanvas.width-fishInfo.width+1);
       fishInfo.y += multiplier*fishInfo.ySpeed;
-      fishInfo.y = clamp(fishInfo.y, -1, shadowCanvas.height-fishInfo.height);
+      fishInfo.y = clamp(fishInfo.y + Math.round(6*Math.random()) -3, -1, shadowCanvas.height-fishInfo.height+1);
     }
   }
 
