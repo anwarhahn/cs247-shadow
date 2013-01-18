@@ -166,24 +166,23 @@ function renderShadow() {
 
     for (var ii = 0; ii < NUM_FISHES; ii++) {
       var time = Date.now();
-      if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
-        fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
-        fishes[ii].image.src = "../images/fish_yellow.png";
-      }	
       fishInfo = fishes[ii];
       shadowContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);
-
       var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
       if (dir == ChangeDirEnum.EDGE) {
         fishInfo.xSpeed *= -1;
         fishInfo.ySpeed *= -1;
       } else if (dir == ChangeDirEnum.SHADOW) {
-        var time = Date.now();
         if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
           fishes[ii].image.src = "../images/fish_yellow_r.png";
           fishInfo.xSpeed *= -1;
           fishInfo.ySpeed *= -1;
           fishInfo.lastTime = time;
+        }
+      } else {
+        if (time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD &&
+            fishes[ii].image.src.indexOf("/images/fish_yellow_r.png") != -1){
+          fishes[ii].image.src = "../images/fish_yellow.png";
         }
       }
       var multiplier = calculateSpeedMultiplier(fishInfo);
