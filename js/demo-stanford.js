@@ -199,9 +199,10 @@ function renderShadow() {
 				if(shadow.data[i] == OVERLAY && shadow.data[i+1] == OVERLAY && shadow.data[i+2] == OVERLAY) {
 					// If the current shadow pixel is to be overlayed, copy it over to
 					// our canvas' pixel data
-					pixels.data[i]   = shadow.data[i];
-					pixels.data[i+1] = shadow.data[i+1];
-					pixels.data[i+2] = shadow.data[i+2];
+					pixels.data[i]   = pixels.data[i] / 2.7; // shadow.data[i];
+					pixels.data[i+1] = pixels.data[i+1] / 2.0; // shadow.data[i+1];
+					pixels.data[i+2] = pixels.data[i+2]/1.5; //shadow.data[i+2];
+					pixels.data[i+3] = 200;
 				}
 			}
 		}
