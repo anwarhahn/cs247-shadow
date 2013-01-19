@@ -44,7 +44,6 @@ $(document).ready(function() {
 
 		fishes[ii] = {x: randomInt(FISH_IMG_WIDTH / 2, shadowCanvas.width - FISH_IMG_WIDTH / 2),
 				 y: randomInt(FISH_IMG_HEIGHT / 2, shadowCanvas.height - FISH_IMG_HEIGHT / 2),
-				 angle: 20 * Math.PI/180,
 				 width: FISH_IMG_WIDTH,
 				 height: FISH_IMG_HEIGHT, 
 				 xSpeed: randomSign() * randomInt(3, 6),
@@ -246,16 +245,17 @@ function renderShadow() {
 			var multiplier = calculateSpeedMultiplier(fishInfo);
 			var xBounce = Math.round(6*Math.random()) -3;
 			var yBounce = Math.round(6*Math.random()) -3;
-      
+
+      var angle = Math.atan(fishInfo.ySpeed/fishInfo.xSpeed);
 			scratchContext.save();
 			scratchContext.translate(fishInfo.x, fishInfo.y);
-			scratchContext.rotate(fishInfo.angle);
+			scratchContext.rotate(angle);
 			scratchContext.translate(-1*fishInfo.x - fishInfo.width / 2.0, -1*fishInfo.y - fishInfo.height / 2.0);
 			scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);      
 			scratchContext.restore();
 
-			fishInfo.x += multiplier * fishInfo.xSpeed * Math.cos(fishInfo.angle) + xBounce;
-			fishInfo.y += multiplier * fishInfo.ySpeed * Math.sin(fishInfo.angle) + yBounce;
+			fishInfo.x += multiplier * fishInfo.xSpeed + xBounce;
+			fishInfo.y += multiplier * fishInfo.ySpeed + yBounce;
 			fishInfo.x = clamp(fishInfo.x, fishInfo.width/2-1, shadowCanvas.width-fishInfo.width/2+1);
 			fishInfo.y = clamp(fishInfo.y, fishInfo.height/2-1, shadowCanvas.height-fishInfo.height/2+1);
 		}
