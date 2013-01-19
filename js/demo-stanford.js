@@ -249,8 +249,8 @@ function renderShadow() {
 				}
 			}
 			var multiplier = calculateSpeedMultiplier(fishInfo);
-			var xBounce = Math.round(6*Math.random()) -3;
-			var yBounce = Math.round(6*Math.random()) -3;
+			var xBounce = 0;//Math.round(6*Math.random()) -3;
+			var yBounce = 0;//Math.round(6*Math.random()) -3;
 
 			scratchContext.save();
 			scratchContext.translate(fishInfo.x, fishInfo.y);
