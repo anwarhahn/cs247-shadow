@@ -246,6 +246,7 @@ function getShadowData() {
             pixelData.data[i] = 0;
             pixelData.data[i+1] = 0;
             pixelData.data[i+2] = 0;
+			pixelData.data[i+3] = 0;
         } else {
             // background
             
