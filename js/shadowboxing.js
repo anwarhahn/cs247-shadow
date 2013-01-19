@@ -250,7 +250,8 @@ function getShadowData() {
             // background
             
             //  update model of background, since we think this is in the background
-            updateBackground(i, rCurrent, gCurrent, bCurrent, rBackground, gBackground, bBackground);
+			// KC: commented out to get rid of shadow trace
+            // updateBackground(i, rCurrent, gCurrent, bCurrent, rBackground, gBackground, bBackground);
             
             // now set the background color
             pixelData.data[i] = 255;
