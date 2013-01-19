@@ -219,18 +219,6 @@ function renderShadow() {
 				fishes[ii].image.src = IMAGE_PATH + fishGallery[fishes[ii].imageID];
 			}	
 			fishInfo = fishes[ii];
-			scratchContext.save();
-			scratchContext.translate(fishInfo.x, fishInfo.y);
-			scratchContext.rotate(fishInfo.angle);
-			scratchContext.translate(-1*fishInfo.x - fishInfo.width / 2.0, -1*fishInfo.y - fishInfo.height / 2.0);
-			scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);      
-			scratchContext.restore();
-				
-
-			fishInfo.x += fishInfo.xSpeed * Math.cos(fishInfo.angle);
-			fishInfo.y += fishInfo.ySpeed * Math.sin(fishInfo.angle);
-
-
 			var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
 			if (dir == ChangeDirEnum.TOP_OR_BOTTOM_EDGE) {
 				fishInfo.ySpeed *= -1;
@@ -258,10 +246,18 @@ function renderShadow() {
 			var multiplier = calculateSpeedMultiplier(fishInfo);
 			var xBounce = Math.round(6*Math.random()) -3;
 			var yBounce = Math.round(6*Math.random()) -3;
-			// fishInfo.x += multiplier*fishInfo.xSpeed;
-			// fishInfo.x = clamp(fishInfo.x + xBounce, -1, shadowCanvas.width-fishInfo.width+1);
-			// fishInfo.y += multiplier*fishInfo.ySpeed;
-			// fishInfo.y = clamp(fishInfo.y + yBounce, -1, shadowCanvas.height-fishInfo.height+1);
+      
+			scratchContext.save();
+			scratchContext.translate(fishInfo.x, fishInfo.y);
+			scratchContext.rotate(fishInfo.angle);
+			scratchContext.translate(-1*fishInfo.x - fishInfo.width / 2.0, -1*fishInfo.y - fishInfo.height / 2.0);
+			scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);      
+			scratchContext.restore();
+
+			fishInfo.x += multiplier * fishInfo.xSpeed * Math.cos(fishInfo.angle) + xBounce;
+			fishInfo.y += multiplier * fishInfo.ySpeed * Math.sin(fishInfo.angle) + yBounce;
+			fishInfo.x = clamp(fishInfo.x, fishInfo.width/2-1, shadowCanvas.width-fishInfo.width/2+1);
+			fishInfo.y = clamp(fishInfo.y, fishInfo.height/2-1, shadowCanvas.height-fishInfo.height/2+1);
 		}
 	}
 	// Loop every millisecond. Changing the freq. is a tradeoff between
