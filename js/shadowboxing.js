@@ -81,8 +81,8 @@ function initializeDOMElements() {
     document.getElementById('capture').appendChild(scratchCanvas);
     scratchContext = scratchCanvas.getContext('2d');
     // mirror horizontally, so it acts like a reflection
-    scratchContext.translate(scratchCanvas.width, 0);
-    scratchContext.scale(-1,1);    
+    //scratchContext.translate(scratchCanvas.width, 0);
+    //scratchContext.scale(-1,1);    
 
     
     shadowCanvas = document.createElement('canvas');
