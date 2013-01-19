@@ -42,8 +42,8 @@ $(document).ready(function() {
 		var imageId = ii%6;
 		fishImage.src = IMAGE_PATH + fishGallery[imageId];
 
-		fishes[ii] = {x: randomInt(0, shadowCanvas.width - FISH_IMG_WIDTH),
-				 y: randomInt(0, shadowCanvas.height - FISH_IMG_HEIGHT),
+		fishes[ii] = {x: randomInt(FISH_IMG_WIDTH / 2, shadowCanvas.width - FISH_IMG_WIDTH / 2),
+				 y: randomInt(FISH_IMG_HEIGHT / 2, shadowCanvas.height - FISH_IMG_HEIGHT / 2),
 				 angle: 20 * Math.PI/180,
 				 width: FISH_IMG_WIDTH,
 				 height: FISH_IMG_HEIGHT, 
@@ -82,8 +82,8 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
 	}
 	fishInfo.outOfBounds = false;
 	var count = 0;
-	for (var dx = 0; dx < fishInfo.width + CHANGE_DIR_PX_THRESHOLD; dx++) {
-		for (var dy = 0; dy < fishInfo.height + CHANGE_DIR_PX_THRESHOLD; dy++) {
+	for (var dx = -fishInfo.width / 2; dx < fishInfo.width / 2 + CHANGE_DIR_PX_THRESHOLD; dx++) {
+		for (var dy = -fishInfo.height / 2; dy < fishInfo.height / 2 + CHANGE_DIR_PX_THRESHOLD; dy++) {
 			var x = Math.round(fishInfo.x + dx);
 			if (fishInfo.xSpeed < 0) {
 				x -= CHANGE_DIR_PX_THRESHOLD; // check left instead of right
