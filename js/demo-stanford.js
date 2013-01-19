@@ -246,12 +246,18 @@ function renderShadow() {
 			var xBounce = Math.round(6*Math.random()) -3;
 			var yBounce = Math.round(6*Math.random()) -3;
 
-      var angle = Math.atan(fishInfo.ySpeed/fishInfo.xSpeed);
 			scratchContext.save();
 			scratchContext.translate(fishInfo.x, fishInfo.y);
+      var angle;
+      if (fishInfo.xSpeed < 0) {
+        scratchContext.scale(-1, 1);
+        angle = Math.atan(-fishInfo.ySpeed/fishInfo.xSpeed);
+      } else {
+        angle = Math.atan(fishInfo.ySpeed/fishInfo.xSpeed);
+      }
 			scratchContext.rotate(angle);
 			scratchContext.translate(-1*fishInfo.x - fishInfo.width / 2.0, -1*fishInfo.y - fishInfo.height / 2.0);
-			scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height);      
+			scratchContext.drawImage(fishInfo.image, fishInfo.x, fishInfo.y, fishInfo.width, fishInfo.height); 
 			scratchContext.restore();
 
 			fishInfo.x += multiplier * fishInfo.xSpeed + xBounce;
