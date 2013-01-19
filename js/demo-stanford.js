@@ -232,8 +232,8 @@ function renderShadow() {
 				if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
 					fishes[ii].numDirChanges++;
 					if(fishes[ii].numDirChanges > 4){
-            fishInfo.x = randomFishX();
-            fishInfo.y = randomFishY();
+						fishInfo.x = randomFishX();
+						fishInfo.y = randomFishY();
 					}
 					fishInfo.xSpeed *= -1;
 					fishInfo.lastTime = time;
