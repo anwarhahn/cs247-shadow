@@ -23,7 +23,7 @@ var INPUT = "webcam";
 var SHADOW_THRESHOLD = 10;
 // Between 0 and 1: how much memory we retain of previous frames.
 // In other words, how much we let the background adapt over time to more recent frames
-var BACKGROUND_ALPHA = 0.75;
+var BACKGROUND_ALPHA = 0.15;
 // We run a gaussian blur over the input image to reduce random noise 
 // in the background subtraction. Change this radius to trade off noise for precision 
 var STACK_BLUR_RADIUS = 10; 
