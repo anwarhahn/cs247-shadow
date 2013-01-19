@@ -1,4 +1,4 @@
-var IMG_SRC  = 'media/underwater.jpg';
+var IMG_SRC  = 'media/underwater_image.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 10;
