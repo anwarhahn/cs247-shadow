@@ -1,7 +1,7 @@
 var IMG_SRC  = 'media/underwater_image.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var SHOW_DEBUG_SHADOW = true;
-var NUM_FISHES = 100;
+var NUM_FISHES = 5;
 var PX_FOR_SHADOW = 20; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
 var CHANGE_DIR_PX_THRESHOLD = 20; // number of pixels away from shadow before fish change direction
 var CHANGE_DIR_MS_THRESHOLD = 1000; // number of ms before fish change direction again
