@@ -1,14 +1,15 @@
 var IMG_SRC  = 'media/underwater_image.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var SHOW_DEBUG_SHADOW = true;
-var NUM_FISHES = 5;
+var NUM_FISHES = 30;
 var PX_FOR_SHADOW = 20; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
 var CHANGE_DIR_PX_THRESHOLD = 20; // number of pixels away from shadow before fish change direction
-var CHANGE_DIR_MS_THRESHOLD = 1000; // number of ms before fish change direction again
+var CHANGE_DIR_MS_THRESHOLD = 100; // number of ms before fish change direction again
+var DISAPPEAR_MS_THRESHOLD = 500; // number of ms for things being trapped
+var DISAPPEAR_NUM_CHANGES = 4; // number of direction changes before they are considered trapped
 var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
 var ACCELERATE_MS = 750; // time for fish to accelerate
 var DECELERATE_MS = 4500; // time for fish to decelerate
-var TIME_STUCK = 4000; // time that a fish spends being stuck
 var IMAGE_PATH = "images/fish_";
 var FISH_IMG_WIDTH = 50;
 var FISH_IMG_HEIGHT = 30;
@@ -57,7 +58,7 @@ $(document).ready(function() {
 				 width: FISH_IMG_WIDTH,
 				 height: FISH_IMG_HEIGHT, 
 				 xSpeed: randomSign() * randomInt(3, 6),
-				 ySpeed: randomSign() * randomInt(1, 2), 
+				 ySpeed: randomSign() * randomInt(1, 7), 
 				 lastTime: 0,
 				 imageID: imageId,
 				 image: fishImage,
@@ -67,9 +68,10 @@ $(document).ready(function() {
 
 var ChangeDirEnum = {
 	NONE : 0,
-	SHADOW : 1,
-	LEFT_OR_RIGHT_EDGE : 2,
-	TOP_OR_BOTTOM_EDGE : 3
+	SHADOW_ON_TOP_OR_BOTTOM : 1,
+	SHADOW_ON_LEFT_OR_RIGHT : 2,
+	LEFT_OR_RIGHT_EDGE : 3,
+	TOP_OR_BOTTOM_EDGE : 4
 }
 
 function changeDirection(fishInfo, shadowCanvas, shadowData) {
@@ -91,6 +93,7 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
 	}
 	fishInfo.outOfBounds = false;
 	var count = 0;
+	var bottom_top = 0, left_right = 0;
 	for (var dx = -fishInfo.width / 2; dx < fishInfo.width / 2 + CHANGE_DIR_PX_THRESHOLD; dx++) {
 		for (var dy = -fishInfo.height / 2; dy < fishInfo.height / 2 + CHANGE_DIR_PX_THRESHOLD; dy++) {
 			var x = Math.round(fishInfo.x + dx);
@@ -107,8 +110,12 @@ function changeDirection(fishInfo, shadowCanvas, shadowData) {
 			}
 			if (shadowData[i] == OVERLAY && shadowData[i+1] == OVERLAY && shadowData[i+2] == OVERLAY) {
 				count++;
+				if (dx < 0 && fishInfo.xSpeed < 0 || dx > 0 && fishInfo.xSpeed > 0) left_right += 1;
+				if (dy < 0 && fishInfo.ySpeed < 0 || dy > 0 && fishInfo.ySpeed > 0) bottom_top += 1;
 				if (count >= PX_FOR_SHADOW) {
-					return ChangeDirEnum.SHADOW;
+					if (bottom_top > left_right) 
+						return ChangeDirEnum.SHADOW_ON_TOP_OR_BOTTOM;
+					return ChangeDirEnum.SHADOW_ON_LEFT_OR_RIGHT;
 				}
 			}
 		}
@@ -210,10 +217,6 @@ function renderShadow() {
 
 
 		for (var ii = 0; ii < NUM_FISHES; ii++) {
-			var time = Date.now();
-			if(time - fishes[ii].lastTime > CHANGE_DIR_MS_THRESHOLD){
-				fishes[ii].image.src = IMAGE_PATH + fishGallery[fishes[ii].imageID];
-			}	
 			fishInfo = fishes[ii];
 			var dir = changeDirection(fishInfo, shadowCanvas, shadow.data);
 			if (dir == ChangeDirEnum.TOP_OR_BOTTOM_EDGE) {
@@ -222,16 +225,27 @@ function renderShadow() {
 			else if (dir == ChangeDirEnum.LEFT_OR_RIGHT_EDGE) {
 				fishInfo.xSpeed *= -1;
 			}
-			else if (dir == ChangeDirEnum.SHADOW) {
-				if (time - fishInfo.lastTime > CHANGE_DIR_MS_THRESHOLD) {
-					fishes[ii].numDirChanges++;
-					if(fishes[ii].numDirChanges > 4){
+			else if (dir == ChangeDirEnum.SHADOW_ON_LEFT_OR_RIGHT || dir == ChangeDirEnum.SHADOW_ON_TOP_OR_BOTTOM) {
+        var time = Date.now();
+        var timeDiff = time - fishInfo.lastTime;
+        var disappeared = false;
+        if (timeDiff < DISAPPEAR_MS_THRESHOLD) {
+          fishInfo.numDirChanges++;
+          if (fishInfo.numDirChanges > DISAPPEAR_NUM_CHANGES) {
             fishInfo.x = randomFishX();
             fishInfo.y = randomFishY();
+            disappeared = true;
+            fishInfo.numDirChanges = 0;
 					}
-					fishInfo.xSpeed *= -1;
-					fishInfo.ySpeed *= -1;
-					fishInfo.lastTime = time;
+        }
+				if (timeDiff > CHANGE_DIR_MS_THRESHOLD && !disappeared) {
+          // bounce
+          if (dir == ChangeDirEnum.SHADOW_ON_LEFT_OR_RIGHT) {
+            fishInfo.xSpeed *= -1;
+          } else {
+            fishInfo.ySpeed *= -1;
+          }
+          fishInfo.lastTime = time;
 				}
 			}
 			var multiplier = calculateSpeedMultiplier(fishInfo);
