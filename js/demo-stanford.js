@@ -2,13 +2,13 @@ var IMG_SRC  = 'media/underwater_image.jpg';
 var OVERLAY  = 0;   // 0 = foreground, 255 = background
 var SHOW_DEBUG_SHADOW = true;
 var NUM_FISHES = 30;
-var PX_FOR_SHADOW = 20; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
-var CHANGE_DIR_PX_THRESHOLD = 20; // number of pixels away from shadow before fish change direction
-var CHANGE_DIR_MS_THRESHOLD = 100; // number of ms before fish change direction again
-var DISAPPEAR_MS_THRESHOLD = 500; // number of ms for things being trapped
-var DISAPPEAR_NUM_CHANGES = 4; // number of direction changes before they are considered trapped
-var MAX_SPEED_MULTIPLIER = 5; // number of ms before fish change direction again
-var ACCELERATE_MS = 750; // time for fish to accelerate
+var PX_FOR_SHADOW = 100; // number of shadow pixels that fish has to encounter before it counts as hitting a shadow
+var CHANGE_DIR_PX_THRESHOLD = 5; // number of pixels away from shadow before fish change direction
+var CHANGE_DIR_MS_THRESHOLD = 500; // number of ms before fish change direction again
+var DISAPPEAR_MS_THRESHOLD = 700; // number of ms for things being trapped
+var DISAPPEAR_NUM_CHANGES = 10; // number of direction changes before they are considered trapped
+var MAX_SPEED_MULTIPLIER = 7; // number of ms before fish change direction again
+var ACCELERATE_MS = 100; // time for fish to accelerate
 var DECELERATE_MS = 4500; // time for fish to decelerate
 var IMAGE_PATH = "images/fish_";
 var FISH_IMG_WIDTH = 50;
@@ -57,8 +57,8 @@ $(document).ready(function() {
 				 y: randomFishY(),
 				 width: FISH_IMG_WIDTH,
 				 height: FISH_IMG_HEIGHT, 
-				 xSpeed: randomSign() * randomInt(3, 6),
-				 ySpeed: randomSign() * randomInt(1, 7), 
+				 xSpeed: randomSign() * randomInt(3, 6) * 0.65,
+				 ySpeed: randomSign() * randomInt(1, 4) * 0.65, 
 				 lastTime: 0,
 				 imageID: imageId,
 				 image: fishImage,
